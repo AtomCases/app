@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Atom Cases — кейсы с подарками</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; }
+        .wallet, .main-container { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 32px; width: 100%; max-width: 560px; padding: 24px 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .logo { background: #ed5d19; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; color: #000; }
+        .title { font-size: 26px; font-weight: 600; color: #fff; }
+        .badge { background: #141414; border: 1px solid #2a2a2a; color: #ed5d19; font-size: 12px; padding: 5px 12px; border-radius: 30px; display: inline-block; margin-bottom: 20px; }
+        .section-title { color: #666; font-size: 13px; font-weight: 600; text-transform: uppercase; margin: 24px 0 12px 0; }
+        .field { margin-bottom: 16px; }
+        .field label { display: block; color: #aaa; font-size: 14px; margin-bottom: 6px; }
+        .field input, select { width: 100%; background: #111; border: 1px solid #2a2a2a; border-radius: 24px; padding: 14px 18px; font-size: 16px; color: #fff; outline: none; }
+        .field input:focus { border-color: #ed5d19; }
+        .username-field { position: relative; }
+        .username-field input { padding-left: 32px; }
+        .username-field::before { content: '@'; position: absolute; left: 18px; top: 42px; color: #888; font-size: 16px; pointer-events: none; }
+        .btn { background: #ed5d19; border: none; border-radius: 28px; padding: 16px 20px; font-size: 17px; font-weight: 600; color: #000; width: 100%; cursor: pointer; margin-top: 8px; }
+        .btn:active { transform: scale(0.99); }
+        .btn-secondary { background: #1a1a1a; color: #fff; }
+        .btn-danger { background: #1a0a0a; color: #ff6b6b; }
+        .btn-atom { background: #2a6f8f; color: #fff; }
+        .btn-withdraw { background: #ff9800; color: #000; }
+        .profile { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 24px; padding: 20px; margin: 16px 0 20px; }
+        .profile-row { display: flex; align-items: center; gap: 16px; }
+        .avatar { width: 64px; height: 64px; background: #ed5d19; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 600; color: #000; }
+        .info h2 { color: #fff; font-size: 20px; }
+        .info .handle { color: #ed5d19; font-size: 14px; }
+        .balance-card { background: #000; border: 1px solid #2a2a2a; border-radius: 24px; padding: 24px; margin-bottom: 20px; }
+        .balance-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+        .balance-label { color: #888; font-size: 13px; text-transform: uppercase; }
+        .balance-amount { color: #fff; font-size: 28px; font-weight: 700; }
+        .balance-amount small { color: #ed5d19; font-size: 14px; }
+        .tabs { display: flex; gap: 6px; margin: 20px 0; }
+        .tab { flex: 1; background: #111; border: 1px solid #2a2a2a; border-radius: 30px; padding: 12px 6px; text-align: center; color: #888; font-size: 14px; cursor: pointer; }
+        .tab.active { background: #ed5d19; color: #000; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .cases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; }
+        .case-card { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .case-card:hover { border-color: #ed5d19; transform: translateY(-2px); }
+        .case-card h3 { margin-bottom: 10px; font-size: 18px; color: #fff; }
+        .case-cost { color: #888; font-size: 13px; margin: 12px 0; }
+        .open-btn { background: #ed5d19; border: none; border-radius: 28px; padding: 12px 20px; font-weight: 600; color: #000; width: 100%; cursor: pointer; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+        .item-card { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 18px; padding: 16px; text-align: center; }
+        .item-name { font-weight: 600; margin-bottom: 8px; color: #fff; font-size: 18px; }
+        .item-value { color: #ed5d19; font-size: 14px; margin-bottom: 10px; }
+        .item-actions button { width: 100%; background: #2a2a2a; border: none; border-radius: 20px; color: #e0e0e0; padding: 10px; font-size: 13px; cursor: pointer; margin-bottom: 8px; }
+        .sell-nft-btn { background: #4CAF50 !important; color: #fff !important; }
+        .slot-machine { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 2000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .slot-reels { background: #1a1a1a; border-radius: 28px; padding: 28px; border: 2px solid #ed5d19; max-width: 90%; width: 420px; text-align: center; }
+        .slot-container { background: #0a0a0a; border-radius: 20px; padding: 20px; margin: 20px 0; overflow: hidden; height: 150px; }
+        .slot-reel-view { height: 110px; overflow: hidden; }
+        .slot-items { position: relative; width: 100%; }
+        .slot-item { height: 110px; display: flex; align-items: center; justify-content: center; font-size: 52px; border-bottom: 1px solid #2a2a2a; }
+        .slot-result { margin-top: 20px; font-size: 18px; font-weight: bold; color: #ed5d19; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a1a; border-radius: 28px; padding: 28px; max-width: 360px; width: 90%; text-align: center; border: 1px solid #ed5d19; }
+        .modal-content h3 { color: #ed5d19; margin-bottom: 12px; }
+        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #2a2a2a; border-radius: 24px; background: #111; color: #fff; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 24px; cursor: pointer; font-weight: 600; }
+        .modal-btn.confirm { background: #4CAF50; color: #fff; }
+        .modal-btn.cancel { background: #2a2a2a; color: #fff; }
+        .close-modal { background: #2a2a2a; border: none; border-radius: 30px; color: #fff; padding: 12px 24px; cursor: pointer; margin-top: 16px; }
+        .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #1a1a1a; text-align: center; font-size: 12px; color: #666; }
+        .hidden { display: none !important; }
+        .loading { text-align: center; color: #666; padding: 40px; }
+        .success { background: #122212; border: 1px solid #2a5a2a; color: #9eff9e; padding: 12px; border-radius: 20px; margin: 16px 0; }
+        @media (max-width: 480px) { .wallet, .main-container { padding: 20px 16px; } .balance-amount { font-size: 24px; } .cases-grid { grid-template-columns: 1fr; } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="loginForm" class="wallet">
+    <div class="header"><div class="logo">⚔️</div><div class="title">Atom Cases</div></div>
+    <div class="badge">кейсы с подарками AtomGlide</div>
+    <div class="section-title">вход через AtomGlide</div>
+    <div class="field username-field">
+        <label>никнейм</label>
+        <input type="text" id="loginUsername" placeholder="username">
+    </div>
+    <div class="field">
+        <label>пароль</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="btn" id="loginBtn">войти в AtomGlide</button>
+    <div class="footer"><span>API: atomglidedev.ru</span><span>⭐ ATM</span></div>
+</div>
+
+<div id="mainInterface" class="main-container hidden">
+    <div class="header"><div class="logo">🎁</div><div class="title">Atom Cases</div></div>
+    <div class="profile"><div class="profile-row"><div class="avatar" id="avatar">👤</div><div class="info"><h2 id="fullName">Игрок</h2><div class="handle" id="userHandle">@player</div></div></div></div>
+    <div class="balance-card">
+        <div class="balance-row"><span class="balance-label">💰 Баланс ATM</span><span class="balance-amount" id="atmBalance">0 <small>ATM</small></span></div>
+        <div class="balance-row"><button class="btn-withdraw" id="withdrawAtmBtn" style="background:#ff9800; color:#000; padding:10px; margin-top:10px;">💸 Вывести ATM</button></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="cases">🎁 кейсы</div>
+        <div class="tab" data-tab="inventory">📦 NFT подарки</div>
+        <div class="tab" data-tab="deposit">💳 пополнить</div>
+        <div class="tab" data-tab="withdrawals">📜 история выводов</div>
+    </div>
+
+    <div id="casesTab" class="tab-content active"><div class="section-title">доступные кейсы</div><div id="casesGrid" class="cases-grid"><div class="loading">загрузка...</div></div></div>
+    <div id="inventoryTab" class="tab-content"><div class="section-title">ваши NFT подарки</div><div id="inventoryGrid" class="inventory-grid"><div class="loading">загрузка...</div></div></div>
+    <div id="depositTab" class="tab-content">
+        <div class="section-title">пополнить баланс</div>
+        <div class="balance-card" style="margin-bottom:16px"><div class="balance-row"><span class="balance-label">💰 Ваш баланс ATM</span><span class="balance-amount" id="atmBalance2">0 <small>ATM</small></span></div></div>
+        <div class="field"><label>сумма пополнения (в ATM)</label><input type="number" id="depositAmount" placeholder="100" min="1"></div>
+        <button class="btn btn-atom" id="depositBtn">💸 пополнить ATM</button>
+        <div id="depositMessage"></div>
+        <div class="footer" style="margin-top:16px">⚡ Перевод на @atomcases</div>
+    </div>
+    <div id="withdrawalsTab" class="tab-content">
+        <div class="section-title">история выводов</div>
+        <div id="withdrawalsList" class="inventory-grid"><div class="loading">загрузка...</div></div>
+    </div>
+
+    <div class="actions"><button class="btn btn-danger" id="logoutBtn">выйти</button></div>
+    <div class="footer">Atom Cases · открывай кейсы с NFT подарками</div>
+</div>
+
+<div id="slotMachine" class="slot-machine"><div class="slot-reels"><h3>🎰 открытие кейса 🎰</h3><div class="slot-container"><div class="slot-reel-view"><div class="slot-items" id="slotItems"></div></div></div><div class="slot-result" id="slotResult"></div><button class="close-modal" id="closeSlotBtn">закрыть</button></div></div>
+<div id="modal" class="modal"><div class="modal-content"><h3 id="modalTitle"></h3><p id="modalMessage"></p><button class="close-modal" id="closeModalBtn">ок</button></div></div>
+<div id="withdrawAtmModal" class="modal"><div class="modal-content"><h3>💸 Вывод ATM</h3><p>Введите сумму для вывода на свой аккаунт <strong id="currentUsernameDisplay"></strong></p><p style="font-size:12px; color:#ed5d19; margin-top:5px;">⚠️ Минимальная сумма вывода: 15 ATM</p><input type="number" id="withdrawAmount" class="modal-input" placeholder="Сумма в ATM" min="15"><div class="modal-buttons"><button class="modal-btn confirm" id="confirmWithdrawBtn">Вывести</button><button class="modal-btn cancel" id="cancelWithdrawBtn">Отмена</button></div></div></div>
+
+<script>
+(function(){
+    const API_BASE = 'https://atomglidedev.ru';
+    const DEPOSIT_RECIPIENT = '@atomcases';
+    const MIN_WITHDRAW_AMOUNT = 15;
+    
+    const SUPABASE_URL = 'https://pmybrbmkanzbsmghhein.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_JYy-UIU1s8gH1EfSv2Bqew_oM5MIKuP';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let currentUser = null, token = null, balance = 0, inventory = [], lastFree = null, slotTimeout = null;
+    let supabaseUserId = null;
+    let bankAccount = null;
+    
+    function parseJwt(t){try{return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}catch(e){return null}}
+    function escapeHtml(s){if(!s)return '';return s.replace(/[&<>]/g,function(m){return m==='&'?'&amp;':m==='<'?'&lt;':m==='>'?'&gt;':m;});}
+    
+    async function apiLogin(u,p){
+        let r=await fetch(`${API_BASE}/auth/login`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({username:u,password:p})
+        });
+        if(!r.ok)throw new Error('Login failed');
+        let d=await r.json();
+        return d.token||d.access_token;
+    }
+    
+    async function apiGetUser(id,t){
+        let r=await fetch(`${API_BASE}/users/${id}`,{headers:{'Authorization':`Bearer ${t}`}});
+        if(!r.ok)throw new Error();
+        return await r.json();
+    }
+    
+    async function apiGetBalance(id,t){
+        let u=await apiGetUser(id,t);
+        return parseFloat(u.balance)||0;
+    }
+    
+    async function apiTransfer(fromToken, toUsername, amount, comment){
+        let r=await fetch(`${API_BASE}/auth/transfer`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${fromToken}`},
+            body:JSON.stringify({username:toUsername,amount:amount,description:comment})
+        });
+        if(!r.ok)throw new Error('Transfer failed: '+(await r.text()));
+        return await r.json();
+    }
+    
+    async function apiGetUserNFTs(userId, userToken){
+        try{
+            let r=await fetch(`${API_BASE}/${userId}/purchases`,{
+                method:'GET',
+                headers:{'Authorization':`Bearer ${userToken}`,'Accept':'application/json'}
+            });
+            if(!r.ok) throw new Error(`HTTP ${r.status}`);
+            let data=await r.json();
+            if(Array.isArray(data)) return data;
+            if(data.purchases && Array.isArray(data.purchases)) return data.purchases;
+            return [];
+        }catch(e){
+            console.error('Get NFTs error:',e);
+            return [];
+        }
+    }
+    
+    async function apiTransferNFT(fromToken, nftId, buyerUsername){
+        let r=await fetch(`${API_BASE}/transfer`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${fromToken}`},
+            body:JSON.stringify({nftId:nftId,buyerUsername:buyerUsername})
+        });
+        if(!r.ok){
+            let err=await r.text();
+            throw new Error(`Transfer failed: ${err}`);
+        }
+        return await r.json();
+    }
+    
+    async function loadBankAccount(){
+        let {data,error}=await supabase.from('bank').select('*').limit(1).maybeSingle();
+        if(data && !error){ bankAccount=data; }
+        else { console.error('Bank account not found'); }
+    }
+    
+    async function getBankTokenAndId(){
+        if(!bankAccount) return null;
+        try{
+            let token=await apiLogin(bankAccount.username, bankAccount.password);
+            let payload=parseJwt(token);
+            return {token:token, userId:payload._id};
+        }catch(e){
+            console.error('Bank login failed:',e);
+            return null;
+        }
+    }
+    
+    async function getOrCreateUserInSupabase(atomglideId, username, fullName){
+        let {data:existing}=await supabase.from('users').select('*').eq('atomglide_id',atomglideId).maybeSingle();
+        if(existing) return existing;
+        let {data:newUser,error}=await supabase.from('users').insert({
+            atomglide_id:atomglideId, username:username, full_name:fullName, balance_atm:0, last_free_case_date:null
+        }).select().single();
+        if(error) throw error;
+        return newUser;
+    }
+    
+    async function loadFromSupabase(userId){
+        let {data:user,error}=await supabase.from('users').select('*').eq('id',userId).single();
+        if(error) throw error;
+        let {data:items}=await supabase.from('inventory').select('*').eq('user_id',userId).order('received_at',{ascending:false});
+        if(items) inventory=items.map(i=>({id:i.id, name:i.gift_name, value:i.gift_value, receivedAt:i.received_at}));
+        return user;
+    }
+    
+    async function saveToSupabase(){
+        if(!supabaseUserId) return;
+        await supabase.from('users').update({balance_atm:balance, last_free_case_date:lastFree}).eq('id',supabaseUserId);
+        let {data:existingItems}=await supabase.from('inventory').select('id,gift_name').eq('user_id',supabaseUserId);
+        if(existingItems){
+            for(let dbItem of existingItems){
+                let stillExists=inventory.some(i=>i.id===dbItem.id);
+                if(!stillExists) await supabase.from('inventory').delete().eq('id',dbItem.id);
+            }
+        }
+        for(let item of inventory){
+            if(!item.id || item.id.toString().startsWith('temp_')){
+                await supabase.from('inventory').insert({user_id:supabaseUserId, gift_name:item.name, gift_value:item.value, received_at:item.receivedAt || new Date().toISOString()});
+            }
+        }
+    }
+    
+    async function recordCaseOpening(caseId, reward, spentAtm){
+        await supabase.from('case_openings').insert({
+            user_id:supabaseUserId, case_id:caseId, reward_type:reward.reward_type,
+            reward_name:reward.reward_name||null, reward_value:reward.reward_value||null,
+            spent_atm:spentAtm, created_at:new Date().toISOString()
+        });
+    }
+    
+    async function recordWithdrawal(withdrawType, amount, itemName, recipient){
+        await supabase.from('withdrawals').insert({
+            user_id:supabaseUserId,
+            username:currentUser.username,
+            withdraw_type:withdrawType,
+            amount:amount || null,
+            item_name:itemName || null,
+            recipient:recipient,
+            status:'completed',
+            created_at:new Date().toISOString()
+        });
+    }
+    
+    async function loadWithdrawals(){
+        let {data:withdrawals,error}=await supabase
+            .from('withdrawals')
+            .select('*')
+            .eq('user_id',supabaseUserId)
+            .order('created_at',{ascending:false});
+        
+        let container=document.getElementById('withdrawalsList');
+        if(error || !withdrawals || withdrawals.length===0){
+            container.innerHTML='<div class="loading">История выводов пуста</div>';
+            return;
+        }
+        
+        container.innerHTML=withdrawals.map(w=>{
+            let typeIcon=w.withdraw_type==='atm'?'💰':'🎁';
+            let amountText=w.withdraw_type==='atm'?`${w.amount} ATM`:`${w.item_name}`;
+            let date=new Date(w.created_at).toLocaleString();
+            return `
+                <div class="item-card">
+                    <div class="item-name">${typeIcon} ${w.withdraw_type.toUpperCase()}</div>
+                    <div class="item-value">${amountText}</div>
+                    <div style="font-size:11px; color:#666;">→ ${w.recipient}</div>
+                    <div style="font-size:10px; color:#444; margin-top:5px;">${date}</div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    async function login(){
+        let u=document.getElementById('loginUsername').value.trim();
+        let p=document.getElementById('loginPassword').value;
+        if(!u||!p){alert('Заполните поля');return;}
+        if(!u.startsWith('@'))u='@'+u;
+        try{
+            token=await apiLogin(u,p);
+            let payload=parseJwt(token);
+            let userData=await apiGetUser(payload._id,token);
+            await loadBankAccount();
+            let supabaseUser=await getOrCreateUserInSupabase(payload._id, u, userData.fullName || u.replace('@',''));
+            supabaseUserId=supabaseUser.id;
+            let supabaseData=await loadFromSupabase(supabaseUserId);
+            balance=supabaseData.balance_atm||0;
+            lastFree=supabaseData.last_free_case_date||null;
+            currentUser={_id:payload._id, username:u, fullName:userData.fullName||u.replace('@',''), atmBalance:parseFloat(userData.balance)||0};
+            document.getElementById('fullName').innerText=currentUser.fullName;
+            document.getElementById('userHandle').innerText=currentUser.username;
+            document.getElementById('avatar').innerText=currentUser.fullName.charAt(0).toUpperCase();
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('mainInterface').classList.remove('hidden');
+            await refresh();
+        }catch(e){alert('Ошибка входа: '+e.message);}
+    }
+    
+    function logout(){
+        currentUser=null; token=null; balance=0; inventory=[]; supabaseUserId=null;
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('mainInterface').classList.add('hidden');
+    }
+    
+    async function withdrawATM(){
+        let amount=parseInt(document.getElementById('withdrawAmount').value);
+        
+        if(!amount || amount <= 0){
+            alert('Введите сумму');
+            return;
+        }
+        if(amount < MIN_WITHDRAW_AMOUNT){
+            alert(`❌ Минимальная сумма вывода: ${MIN_WITHDRAW_AMOUNT} ATM`);
+            return;
+        }
+        if(amount > balance){
+            alert(`❌ Недостаточно ATM. Доступно: ${balance} ATM`);
+            return;
+        }
+        if(!bankAccount){
+            alert('❌ Банковский аккаунт не настроен');
+            return;
+        }
+        
+        try{
+            let bankData=await getBankTokenAndId();
+            if(!bankData){
+                alert('❌ Не удалось авторизовать банковский аккаунт');
+                return;
+            }
+            
+            let comment=`Вывод средств от пользователя ${currentUser.username} на сумму ${amount} ATM`;
+            await apiTransfer(bankData.token, currentUser.username, amount, comment);
+            
+            balance-=amount;
+            await saveToSupabase();
+            await recordWithdrawal('atm', amount, null, currentUser.username);
+            await refresh();
+            
+            alert(`✅ Успешно выведено ${amount} ATM на ваш аккаунт ${currentUser.username}`);
+            document.getElementById('withdrawAmount').value='';
+            document.getElementById('withdrawAtmModal').style.display='none';
+        }catch(e){ 
+            alert('Ошибка вывода: '+e.message); 
+        }
+    }
+    
+    async function deposit(){
+        let amt=parseInt(document.getElementById('depositAmount').value);
+        if(!amt||amt<=0){alert('Введите сумму');return;}
+        let userBalance=await apiGetBalance(currentUser._id,token);
+        if(userBalance<amt){alert(`❌ Недостаточно ATM. Доступно: ${userBalance} ATM`);return;}
+        let comment=`Пополнение баланса в Atom Cases на сумму ${amt} ATM`;
+        try{
+            await apiTransfer(token, DEPOSIT_RECIPIENT, amt, comment);
+            balance+=amt;
+            await saveToSupabase();
+            await refresh();
+            document.getElementById('depositAmount').value='';
+            document.getElementById('depositMessage').innerHTML='<div class="success">✅ Баланс пополнен!</div>';
+            setTimeout(()=>document.getElementById('depositMessage').innerHTML='',3000);
+        }catch(e){ alert('❌ Ошибка перевода: '+e.message); }
+    }
+    
+    async function withdrawNFT(nftName){
+        if(!bankAccount){ alert('❌ Банковский аккаунт не настроен'); return false; }
+        
+        let itemIndex=inventory.findIndex(i=>i.name===nftName);
+        if(itemIndex===-1){ alert('❌ NFT не найден в инвентаре'); return false; }
+        
+        try{
+            let bankData=await getBankTokenAndId();
+            if(!bankData){ alert('❌ Не удалось авторизовать банковский аккаунт'); return false; }
+            
+            let bankNFTs=await apiGetUserNFTs(bankData.userId, bankData.token);
+            
+            let targetNFT=null, nftId=null;
+            for(let nft of bankNFTs){
+                let nftTitle=nft.name||nft.title||nft.item_name;
+                if(nftTitle===nftName){
+                    targetNFT=nft;
+                    nftId=nft._id||nft.id;
+                    break;
+                }
+            }
+            
+            if(!targetNFT||!nftId){
+                alert(`❌ NFT "${nftName}" не найден в банковском аккаунте`);
+                return false;
+            }
+            
+            await apiTransferNFT(bankData.token, nftId, currentUser.username);
+            
+            inventory.splice(itemIndex,1);
+            await saveToSupabase();
+            await recordWithdrawal('nft', null, nftName, currentUser.username);
+            await refresh();
+            
+            alert(`✅ NFT "${nftName}" успешно выведен на ваш аккаунт ${currentUser.username}`);
+            return true;
+        }catch(e){
+            console.error('Withdraw NFT error:',e);
+            alert('❌ Ошибка вывода NFT: '+e.message);
+            return false;
+        }
+    }
+    
+    async function loadCases() {
+        console.log('Loading cases from Supabase...');
+        
+        let { data: dbCases, error } = await supabase
+            .from('cases')
+            .select('*')
+            .eq('is_active', true)
+            .order('id', { ascending: true });
+        
+        if (error) {
+            console.error('Error loading cases:', error);
+            document.getElementById('casesGrid').innerHTML = '<div class="loading">Ошибка загрузки кейсов: ' + error.message + '</div>';
+            return;
+        }
+        
+        console.log('Loaded cases:', dbCases);
+        
+        if (!dbCases || dbCases.length === 0) {
+            document.getElementById('casesGrid').innerHTML = '<div class="loading">Нет доступных кейсов. Добавьте кейсы в админ-панели.</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let c of dbCases) {
+            html += `<div class="case-card" data-id="${c.id}" data-cost="${c.cost_tokens}">
+                        <h3>${c.background_icon || '📦'} ${c.case_name}</h3>
+                        <div class="case-cost">${c.cost_tokens > 0 ? `💰 ${c.cost_tokens} ATM` : '🎁 бесплатно (раз в день)'}</div>
+                        <button class="open-btn">открыть</button>
+                    </div>`;
+        }
+        document.getElementById('casesGrid').innerHTML = html;
+        
+        document.querySelectorAll('.case-card').forEach(card => {
+            card.querySelector('.open-btn').onclick = async () => {
+                let id = parseInt(card.dataset.id);
+                let cost = parseInt(card.dataset.cost);
+                await openCase(id, cost);
+            };
+        });
+    }
+    
+    async function openCase(caseId, costAtm) {
+        const isFree = (costAtm === 0);
+        
+        if (isFree) {
+            const today = new Date().toDateString();
+            if (lastFree === today) {
+                alert('Бесплатный кейс доступен раз в день');
+                return;
+            }
+        } else {
+            if (balance < costAtm) {
+                alert(`Не хватает ATM. Нужно: ${costAtm} ATM`);
+                return;
+            }
+        }
+        
+        let { data: rewards, error } = await supabase
+            .from('case_rewards')
+            .select('*')
+            .eq('case_id', caseId);
+        
+        if (error || !rewards || rewards.length === 0) {
+            alert('Ошибка загрузки наград кейса');
+            return;
+        }
+        
+        const totalChance = rewards.reduce((s, r) => s + r.chance, 0);
+        let rand = Math.random() * totalChance;
+        let selected = rewards[0];
+        for (const r of rewards) {
+            if (rand <= r.chance) {
+                selected = r;
+                break;
+            }
+            rand -= r.chance;
+        }
+        
+        await showSlotAnimation(selected);
+        
+        let spent = costAtm;
+        if (isFree) {
+            lastFree = new Date().toDateString();
+            spent = 0;
+        } else {
+            balance -= costAtm;
+        }
+        
+        let resultMsg = '';
+        
+        if (selected.reward_type === 'atm') {
+            balance += selected.reward_value;
+            resultMsg = `💰 +${selected.reward_value} ATM!`;
+            await saveToSupabase();
+        } else if (selected.reward_type === 'nft') {
+            inventory.unshift({
+                id: 'temp_' + Date.now() + Math.random(),
+                name: selected.reward_name,
+                value: selected.reward_value,
+                receivedAt: new Date().toISOString()
+            });
+            resultMsg = `🎁 ${selected.reward_name} добавлен в инвентарь!`;
+            await saveToSupabase();
+        }
+        
+        await recordCaseOpening(caseId, selected, spent);
+        await refresh();
+        
+        setTimeout(() => showModal('🎉 Поздравляем!', resultMsg), 2600);
+    }
+    
+    async function showSlotAnimation(reward) {
+        const slot = document.getElementById('slotMachine');
+        const itemsContainer = document.getElementById('slotItems');
+        const resultDiv = document.getElementById('slotResult');
+        
+        const icons = ['🎁', '💰', '🎰', '✨', '🎲', '🏆'];
+        let finalIcon = reward.reward_type === 'atm' ? '💰' : '🎁';
+        
+        let html = '';
+        for (let i = 0; i < 30; i++) {
+            html += `<div class="slot-item">${icons[Math.floor(Math.random() * icons.length)]}</div>`;
+        }
+        html += `<div class="slot-item">${finalIcon}</div>`;
+        itemsContainer.innerHTML = html;
+        
+        slot.style.display = 'flex';
+        resultDiv.textContent = 'крутим...';
+        
+        itemsContainer.style.transition = 'none';
+        itemsContainer.style.transform = 'translateY(0)';
+        itemsContainer.offsetHeight;
+        itemsContainer.style.transition = 'transform 2.5s cubic-bezier(0.25, 0.1, 0.15, 1)';
+        itemsContainer.style.transform = `translateY(${-(30 * 111)}px)`;
+        
+        if (slotTimeout) clearTimeout(slotTimeout);
+        slotTimeout = setTimeout(() => {
+            if (reward.reward_type === 'atm') {
+                resultDiv.textContent = `🎉 +${reward.reward_value} ATM! 🎉`;
+            } else {
+                resultDiv.textContent = `🎉 ${reward.reward_name}! 🎉`;
+            }
+        }, 2500);
+    }
+    
+    function closeSlot() {
+        if (slotTimeout) clearTimeout(slotTimeout);
+        document.getElementById('slotMachine').style.display = 'none';
+    }
+    
+    async function loadInventory(){
+        let grid=document.getElementById('inventoryGrid');
+        if(!inventory.length){grid.innerHTML='<div class="loading">У вас пока нет NFT подарков</div>';return;}
+        grid.innerHTML=inventory.map(i=>`<div class="item-card"><div class="item-name">${escapeHtml(i.name)}</div><div class="item-value">💰 Цена: ${i.value} ATM</div><div class="item-actions"><button class="sell-nft-btn" data-id="${i.id}" data-value="${i.value}" data-name="${escapeHtml(i.name)}">💰 Продать за ${i.value} ATM</button><button class="withdraw-nft-btn" data-name="${escapeHtml(i.name)}">🎁 Вывести NFT</button></div></div>`).join('');
+        
+        document.querySelectorAll('.sell-nft-btn').forEach(btn=>{btn.onclick=async()=>{
+            let itemId=btn.dataset.id, itemValue=parseInt(btn.dataset.value), itemName=btn.dataset.name;
+            let idx=inventory.findIndex(i=>i.id==itemId);
+            if(idx===-1){alert('Предмет не найден');return;}
+            inventory.splice(idx,1);
+            balance+=itemValue;
+            await saveToSupabase();
+            await refresh();
+            alert(`✅ "${itemName}" продан за ${itemValue} ATM`);
+        };});
+        
+        document.querySelectorAll('.withdraw-nft-btn').forEach(btn=>{btn.onclick=async()=>{
+            let itemName=btn.dataset.name;
+            await withdrawNFT(itemName);
+        };});
+    }
+    
+    async function refresh(){
+        if(!currentUser)return;
+        try{
+            let b=await apiGetBalance(currentUser._id,token);
+            currentUser.atmBalance=b;
+        }catch(e){}
+        document.getElementById('atmBalance').innerHTML=`${balance} <small>ATM</small>`;
+        document.getElementById('atmBalance2').innerHTML=`${balance} <small>ATM</small>`;
+        await loadInventory();
+        if(document.querySelector('.tab.active')?.dataset.tab === 'withdrawals'){
+            await loadWithdrawals();
+        }
+        await loadCases();
+    }
+    
+    function showModal(title, msg) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = msg;
+        document.getElementById('modal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+    
+    function initTabs(){
+        document.querySelectorAll('.tab').forEach(t=>{
+            t.onclick=async()=>{
+                let n=t.dataset.tab;
+                document.querySelectorAll('.tab').forEach(tt=>tt.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                t.classList.add('active');
+                document.getElementById(`${n}Tab`).classList.add('active');
+                if(n==='inventory') await loadInventory();
+                if(n==='withdrawals') await loadWithdrawals();
+                if(n==='cases') await loadCases();
+            };
+        });
+    }
+    
+    document.getElementById('loginBtn').onclick=login;
+    document.getElementById('logoutBtn').onclick=logout;
+    document.getElementById('depositBtn').onclick=deposit;
+    document.getElementById('withdrawAtmBtn').onclick=()=>{
+        document.getElementById('currentUsernameDisplay').innerText=currentUser.username;
+        document.getElementById('withdrawAtmModal').style.display='flex';
+    };
+    document.getElementById('confirmWithdrawBtn').onclick=withdrawATM;
+    document.getElementById('cancelWithdrawBtn').onclick=()=>document.getElementById('withdrawAtmModal').style.display='none';
+    document.getElementById('closeModalBtn').onclick=closeModal;
+    document.getElementById('closeSlotBtn').onclick=closeSlot;
+    
+    initTabs();
+    loadCases();
+})();
+</script>
+</body>
+</html>
